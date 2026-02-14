@@ -19,19 +19,27 @@ let reclutadorAsignado = null;
 const RECLUTADORES_CDMX = {
     'Yelitza Jazmin Orsuna Sanchez': {
         email: 'yelitzaorsuna_att@outlook.com',
-        whatsapp: '', // Agregar cuando tengas el número
-        whatsappNumero: ''
+        whatsapp: '55 2106 5618',
+        whatsappNumero: '5521065618'
     },
     'Perla García Mendez': {
         email: 'perlagarciam88@gmail.com',
-        whatsapp: '',
-        whatsappNumero: ''
+        whatsapp: '56 5741 9923',
+        whatsappNumero: '5657419923'
     },
     'Marco Antonio Becerra Olguin': {
         email: 'ji4668expercell@gmail.com',
-        whatsapp: '',
-        whatsappNumero: ''
+        whatsapp: '56 1082 8443',
+        whatsappNumero: '5610828443'
     }
+};
+
+// Línea principal visible para el candidato
+const EQUIPO_CDMX = {
+    nombre: 'Equipo de Reclutamiento CDMX',
+    email: 'yelitzaorsuna_att@outlook.com',
+    whatsapp: '55 2106 5618',
+    whatsappNumero: '5521065618'
 };
 
 const mapsLinks = {
@@ -456,8 +464,13 @@ function setupDatePicker() {
     const dateInput = document.getElementById('fecha-cita');
     const ahora = new Date();
     
+    // Buscar el próximo día hábil (L-V)
     let fechaMinima = new Date(ahora);
     if (ahora.getHours() >= 18) {
+        fechaMinima.setDate(fechaMinima.getDate() + 1);
+    }
+    // Si cae en sábado(6) o domingo(0), avanzar a lunes
+    while (fechaMinima.getDay() === 0 || fechaMinima.getDay() === 6) {
         fechaMinima.setDate(fechaMinima.getDate() + 1);
     }
     dateInput.min = fechaMinima.toISOString().split('T')[0];
@@ -467,38 +480,49 @@ function setupDatePicker() {
     dateInput.max = maxDate.toISOString().split('T')[0];
     
     dateInput.addEventListener('change', function() {
+        const selected = new Date(this.value + 'T12:00:00');
+        const dia = selected.getDay();
+        if (dia === 0 || dia === 6) {
+            alert('Solo puedes agendar citas de lunes a viernes.');
+            this.value = '';
+            return;
+        }
         cargarHorariosDisponibles(this.value);
     });
     
-    // ─── ASIGNACIÓN DE RECLUTADOR(A) ───
+    // ─── ASIGNACIÓN INTERNA DE RECLUTADOR(A) ───
+    // Internamente se asigna por round-robin para el backend/email
+    // Pero al candidato siempre le mostramos "Equipo de Reclutamiento CDMX"
     if (reclutadorAsignado && RECLUTADORES_CDMX[reclutadorAsignado]) {
-        // Si el candidato fue contactado por un reclutador específico, asignarlo
-        const info = RECLUTADORES_CDMX[reclutadorAsignado];
-        reclutadorInfo.nombre = reclutadorAsignado;
-        reclutadorInfo.email = info.email;
-        reclutadorInfo.whatsapp = info.whatsapp || info.email;
-        reclutadorInfo.whatsappNumero = info.whatsappNumero || '';
         candidateData.reclutadora = reclutadorAsignado;
     } else {
-        // Round-robin simple: asignar basado en timestamp del candidato
-        // El servidor hará la asignación definitiva, pero mostramos uno al candidato
         const nombres = Object.keys(RECLUTADORES_CDMX);
         const index = Date.now() % nombres.length;
-        const asignado = nombres[index];
-        const info = RECLUTADORES_CDMX[asignado];
-        
-        reclutadorInfo.nombre = asignado;
-        reclutadorInfo.email = info.email;
-        reclutadorInfo.whatsapp = info.whatsapp || info.email;
-        reclutadorInfo.whatsappNumero = info.whatsappNumero || '';
-        candidateData.reclutadora = asignado;
+        candidateData.reclutadora = nombres[index];
     }
+    
+    // Al candidato siempre le mostramos el equipo genérico
+    reclutadorInfo.nombre = EQUIPO_CDMX.nombre;
+    reclutadorInfo.email = EQUIPO_CDMX.email;
+    reclutadorInfo.whatsapp = EQUIPO_CDMX.whatsapp;
+    reclutadorInfo.whatsappNumero = EQUIPO_CDMX.whatsappNumero;
     
     document.getElementById('reclutador-nombre').textContent = reclutadorInfo.nombre;
     document.getElementById('reclutador-sucursal').textContent = candidateData.sucursal;
     document.getElementById('reclutador-email').textContent = reclutadorInfo.email;
     document.getElementById('reclutador-email').href = 'mailto:' + reclutadorInfo.email;
-    document.getElementById('reclutador-whatsapp').textContent = reclutadorInfo.whatsapp || reclutadorInfo.email;
+    
+    // Mostrar WhatsApp
+    if (reclutadorInfo.whatsappNumero && reclutadorInfo.whatsappNumero !== '') {
+        document.getElementById('reclutador-whatsapp').textContent = reclutadorInfo.whatsapp;
+    } else {
+        document.getElementById('reclutador-whatsapp').textContent = reclutadorInfo.email + ' (email)';
+        const btnCV = document.getElementById('btn-enviar-cv');
+        if (btnCV) {
+            btnCV.textContent = '📧 Enviar CV por Email →';
+            btnCV.style.background = 'linear-gradient(135deg, #0066CC 0%, #0057B8 100%)';
+        }
+    }
 }
 
 // =====================================================
@@ -529,7 +553,7 @@ async function cargarHorariosDisponibles(fecha) {
             '15:00', '15:15', '15:30', '15:45',
             '16:00', '16:15', '16:30', '16:45',
             '17:00', '17:15', '17:30', '17:45',
-            '18:00', '18:15', '18:30', '18:45'
+            '18:00'
         ];
         
         const ahora = new Date();
@@ -582,7 +606,7 @@ async function cargarHorariosDisponibles(fecha) {
             '11:00', '11:15', '11:30', '11:45', '12:00', '12:15', '12:30', '12:45',
             '13:00', '13:15', '13:30', '13:45', '14:00', '14:15', '14:30', '14:45',
             '15:00', '15:15', '15:30', '15:45', '16:00', '16:15', '16:30', '16:45',
-            '17:00', '17:15', '17:30', '17:45', '18:00', '18:15', '18:30', '18:45'
+            '17:00', '17:15', '17:30', '17:45', '18:00'
         ];
         timeSlotsContainer.innerHTML = '';
         todosLosHorarios.forEach(horario => {
@@ -717,13 +741,14 @@ function sendCVWhatsApp() {
     
     const mensaje = `Hola ${reclutadorInfo.nombre.split(' ')[0]}, soy ${candidateData.nombre}.\n\nAcabo de completar el pre-filtro para el puesto de Agente Telefónico AT&T.\n\n📋 *Datos de mi cita:*\n📅 Fecha: ${fechaFormateada}\n🕐 Hora: ${candidateData.citaHora}\n🏢 Sucursal: ${candidateData.sucursal}\n\nAdjunto mi CV para su revisión.\n\n¡Saludos!`;
     
-    if (reclutadorInfo.whatsappNumero) {
+    if (reclutadorInfo.whatsappNumero && reclutadorInfo.whatsappNumero !== '') {
         const whatsappURL = `https://wa.me/52${reclutadorInfo.whatsappNumero}?text=${encodeURIComponent(mensaje)}`;
         window.open(whatsappURL, '_blank');
     } else {
-        // Si no hay WhatsApp configurado, abrir email
-        const mailURL = `mailto:${reclutadorInfo.email}?subject=CV - ${candidateData.nombre} - Pre-Filtro AT&T&body=${encodeURIComponent(mensaje)}`;
-        window.open(mailURL, '_blank');
+        // Sin WhatsApp configurado — abrir email con el mensaje
+        const subject = encodeURIComponent(`CV - ${candidateData.nombre} - Pre-Filtro AT&T CDMX`);
+        const body = encodeURIComponent(mensaje);
+        window.open(`mailto:${reclutadorInfo.email}?subject=${subject}&body=${body}`, '_blank');
     }
 }
 
