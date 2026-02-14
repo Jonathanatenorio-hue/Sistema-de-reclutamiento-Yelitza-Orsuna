@@ -5,7 +5,7 @@
 // =====================================================
 
 // ⚠️ IMPORTANTE: Reemplaza con la URL de tu Web App de CDMX
-const GOOGLE_SCRIPT_URL = 'TU_WEB_APP_URL_CDMX_AQUI';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfy0ZgzFKgPY6LDMn57jyGNHcgf7C1_kMhOXfPoaNqoNKKYDhQlCmo-yidnMItNyoM5A/exec';
 
 let candidateData = {}, selectedTime = null, selectedSucursal = null, selectedDireccion = null, totalScore = 0;
 let reclutadorInfo = { nombre: '', email: '', whatsapp: '', whatsappNumero: '' };
