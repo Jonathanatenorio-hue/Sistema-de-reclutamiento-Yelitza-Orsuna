@@ -464,12 +464,12 @@ function setupDatePicker() {
     const dateInput = document.getElementById('fecha-cita');
     const ahora = new Date();
     
-    // Buscar el próximo día hábil (L-V)
+    // Fecha mínima: próximo día hábil (L-V)
     let fechaMinima = new Date(ahora);
     if (ahora.getHours() >= 18) {
         fechaMinima.setDate(fechaMinima.getDate() + 1);
     }
-    // Si cae en sábado(6) o domingo(0), avanzar a lunes
+    // Si cae en sábado o domingo, avanzar a lunes
     while (fechaMinima.getDay() === 0 || fechaMinima.getDay() === 6) {
         fechaMinima.setDate(fechaMinima.getDate() + 1);
     }
@@ -739,7 +739,7 @@ function sendCVWhatsApp() {
     const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const fechaFormateada = fechaObj.toLocaleDateString('es-MX', opcionesFecha);
     
-    const mensaje = `Hola ${reclutadorInfo.nombre.split(' ')[0]}, soy ${candidateData.nombre}.\n\nAcabo de completar el pre-filtro para el puesto de Agente Telefónico AT&T.\n\n📋 *Datos de mi cita:*\n📅 Fecha: ${fechaFormateada}\n🕐 Hora: ${candidateData.citaHora}\n🏢 Sucursal: ${candidateData.sucursal}\n\nAdjunto mi CV para su revisión.\n\n¡Saludos!`;
+    const mensaje = `Hola, buen día. Soy ${candidateData.nombre}.\n\nAcabo de completar el pre-filtro para el puesto de Agente Telefónico AT&T.\n\n📋 *Datos de mi cita:*\n📅 Fecha: ${fechaFormateada}\n🕐 Hora: ${candidateData.citaHora}\n🏢 Sucursal: ${candidateData.sucursal}\n\nAdjunto mi CV para su revisión.\n\n¡Saludos!`;
     
     if (reclutadorInfo.whatsappNumero && reclutadorInfo.whatsappNumero !== '') {
         const whatsappURL = `https://wa.me/52${reclutadorInfo.whatsappNumero}?text=${encodeURIComponent(mensaje)}`;
