@@ -473,11 +473,20 @@ function setupDatePicker() {
     while (fechaMinima.getDay() === 0 || fechaMinima.getDay() === 6) {
         fechaMinima.setDate(fechaMinima.getDate() + 1);
     }
-    dateInput.min = fechaMinima.toISOString().split('T')[0];
+    
+    // Usar formato local para evitar problemas de zona horaria
+    const formatDate = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    };
+    
+    dateInput.min = formatDate(fechaMinima);
     
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 30);
-    dateInput.max = maxDate.toISOString().split('T')[0];
+    dateInput.max = formatDate(maxDate);
     
     dateInput.addEventListener('change', function() {
         const selected = new Date(this.value + 'T12:00:00');
